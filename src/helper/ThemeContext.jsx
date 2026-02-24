@@ -1,25 +1,46 @@
-import React, { createContext, useState, useMemo, useContext } from "react";
+import React, { createContext, useState, useMemo, useContext, useEffect } from "react";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 
-const ThemeModeContext = createContext(undefined);
+const ThemeModeContext = createContext();
 
 export const ThemeModeProvider = ({ children }) => {
-  const [mode, setMode] = useState("light");
+
+  // 🔥 Read from localStorage first
+  const [mode, setMode] = useState(() => {
+    return localStorage.getItem("themeMode") || "light";
+  });
+
+  // 🔥 Save to localStorage whenever mode changes
+  useEffect(() => {
+    localStorage.setItem("themeMode", mode);
+  }, [mode]);
 
   const theme = useMemo(
-    () => createTheme({ 
-      palette: { 
-        mode,
-        ...(mode === 'light' 
-          ? { background: { default: "#f5f5f5", paper: "#ffffff" } }
-          : { background: { default: "#121212", paper: "#1e1e1e" } }
-        )
-      } 
-    }),
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          ...(mode === "light"
+            ? {
+                background: {
+                  default: "#f5f5f5",
+                  paper: "#ffffff",
+                },
+              }
+            : {
+                background: {
+                  default: "#121212",
+                  paper: "#1e1e1e",
+                },
+              }),
+        },
+      }),
     [mode]
   );
 
-  const toggleMode = () => setMode((prev) => (prev === "light" ? "dark" : "light"));
+  const toggleMode = () => {
+    setMode((prev) => (prev === "light" ? "dark" : "light"));
+  };
 
   return (
     <ThemeModeContext.Provider value={{ mode, toggleMode }}>
@@ -32,9 +53,5 @@ export const ThemeModeProvider = ({ children }) => {
 };
 
 export const useThemeMode = () => {
-  const context = useContext(ThemeModeContext);
-  if (!context) {
-    throw new Error("useThemeMode must be used within a ThemeModeProvider");
-  }
-  return context;
+  return useContext(ThemeModeContext);
 };

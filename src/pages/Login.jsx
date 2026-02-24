@@ -4,21 +4,26 @@ import GoogleIcon from "@mui/icons-material/Google";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useThemeMode } from "../helper/ThemeContext.jsx";
-import { useGoogleLogin, useGoogleOAuth } from "@react-oauth/google";
+import { useGoogleLogin, } from "@react-oauth/google";
+import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 
 function Login() {
   const { mode, toggleMode } = useThemeMode();
-  const login = useGoogleLogin({
-    scope: 'https://www.googleapis.com/auth/youtube.upload',
-    onSuccess : (response) =>{
-      console.log(response);
-      navigate('/upload')
-    },
-    onError:(error) =>{
-      toast.error("Login Error")
-      console.log(error)
-    }
-  })
+
+  const navigate = useNavigate();
+ const login = useGoogleLogin({
+  flow: "auth-code",   // 🔥 ADD THIS
+  scope: "https://www.googleapis.com/auth/youtube.upload",
+  onSuccess: (codeResponse) => {
+    console.log(codeResponse);
+    navigate("/upload");
+  },
+  onError: (error) => {
+    toast.error("Login Failed. Please try again.");
+    console.log(error);
+  }
+});
 
   return (
     <Box 
